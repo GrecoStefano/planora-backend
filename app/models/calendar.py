@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean, Text, JSON, Enum
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 import enum
@@ -61,6 +62,7 @@ class Event(Base):
     video_link = Column(String, nullable=True)
     privacy_level = Column(Enum(PrivacyLevel), default=PrivacyLevel.PRIVATE, nullable=False)
     attachments = Column(JSON, default=list, nullable=False)
+    event_metadata = Column("metadata", JSON, default=dict, nullable=False)  # For event type, subtype, etc.
     timezone = Column(String, default="UTC", nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

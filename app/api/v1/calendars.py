@@ -21,15 +21,24 @@ async def list_calendars(
     db: AsyncSession = Depends(get_db),
 ):
     """List all calendars accessible by the current user."""
-    # Get calendars owned by user or shared with user
-    result = await db.execute(
-        select(Calendar).where(
-            (Calendar.owner_id == current_user.id) | 
-            (Calendar.acl.contains({"users": [current_user.id]}))
-        )
-    )
-    calendars = result.scalars().all()
-    return calendars
+    # Get all calendars and filter in Python to avoid JSON operator issues
+    # This is simpler and more reliable for JSON fields
+    result = await db.execute(select(Calendar))
+    all_calendars = result.scalars().all()
+    
+    # Filter calendars: owned by user or user is in ACL users array
+    accessible_calendars = []
+    for cal in all_calendars:
+        # Owner has access
+        if cal.owner_id == current_user.id:
+            accessible_calendars.append(cal)
+        # Check if user is in ACL users array
+        elif cal.acl and isinstance(cal.acl, dict):
+            users = cal.acl.get("users", [])
+            if isinstance(users, list) and current_user.id in users:
+                accessible_calendars.append(cal)
+    
+    return accessible_calendars
 
 
 @router.post("", response_model=CalendarResponse, status_code=status.HTTP_201_CREATED)

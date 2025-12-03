@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings
 from typing import List
+from pydantic import ConfigDict
 import os
 
 # Read CORS_ORIGINS before pydantic-settings tries to parse it
@@ -29,6 +30,9 @@ class Settings(BaseSettings):
     ALGORITHM: str = os.getenv("ALGORITHM", "HS256")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
     
+    # CORS - defined but not read from env (we parse manually)
+    CORS_ORIGINS: List[str] = []
+    
     # Email
     SMTP_HOST: str = os.getenv("SMTP_HOST", "")
     SMTP_PORT: int = int(os.getenv("SMTP_PORT", "587"))
@@ -40,12 +44,12 @@ class Settings(BaseSettings):
     MAX_UPLOAD_SIZE: int = 10 * 1024 * 1024  # 10MB
     UPLOAD_DIR: str = "uploads"
     
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
-        # Ignore CORS_ORIGINS from env file (we'll parse it manually)
-        env_ignore_empty = True
-        extra = "ignore"  # Ignore extra fields from env
+    model_config = ConfigDict(
+        env_file=".env",
+        case_sensitive=True,
+        # Don't read CORS_ORIGINS from env (we'll set it manually)
+        env_ignore_empty=True
+    )
 
 
 # Create settings instance
@@ -55,6 +59,6 @@ settings = Settings()
 if "_cors_origins_backup" in locals():
     os.environ["CORS_ORIGINS"] = _cors_origins_backup
 
-# Parse CORS_ORIGINS manually and add as attribute
+# Parse CORS_ORIGINS manually and set it (now it's a defined field, so this will work)
 settings.CORS_ORIGINS = [origin.strip() for origin in _cors_origins_env.split(",") if origin.strip()]
 

@@ -35,7 +35,7 @@ class Task(Base):
     recurrence = Column(String, nullable=True)  # RRULE string
     tags = Column(JSON, default=list, nullable=False)  # Array of tag names for quick access
     attachments = Column(JSON, default=list, nullable=False)
-    metadata = Column(JSON, default=dict, nullable=False)
+    task_metadata = Column("metadata", JSON, default=dict, nullable=False)  # Renamed to avoid SQLAlchemy conflict
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 

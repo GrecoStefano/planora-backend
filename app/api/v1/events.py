@@ -115,6 +115,7 @@ async def create_event(
         video_link=event_data.video_link,
         privacy_level=event_data.privacy_level,
         timezone=event_data.timezone,
+        event_metadata=event_data.metadata or {},
         attachments=[],
     )
     
@@ -261,6 +262,9 @@ async def update_event(
     
     # Update fields
     update_data = event_data.dict(exclude_unset=True)
+    # Handle metadata field mapping (event_metadata in model, metadata in schema)
+    if 'metadata' in update_data:
+        update_data['event_metadata'] = update_data.pop('metadata')
     for field, value in update_data.items():
         setattr(event, field, value)
     

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_serializer
 from typing import Optional, List
 from datetime import datetime
 from app.models.calendar import CalendarScope, RSVPStatus, PrivacyLevel
@@ -46,6 +46,7 @@ class EventBase(BaseModel):
     video_link: Optional[str] = None
     privacy_level: PrivacyLevel = PrivacyLevel.PRIVATE
     timezone: str = "UTC"
+    metadata: Optional[dict] = None  # For event type, subtype, etc.
 
 
 class EventCreate(EventBase):
@@ -64,6 +65,7 @@ class EventUpdate(BaseModel):
     video_link: Optional[str] = None
     privacy_level: Optional[PrivacyLevel] = None
     timezone: Optional[str] = None
+    metadata: Optional[dict] = None
 
 
 class EventAttendeeResponse(BaseModel):
@@ -83,12 +85,14 @@ class EventResponse(EventBase):
     calendar_id: int
     creator_id: int
     attachments: List[dict]
+    metadata: dict = Field(alias="event_metadata")
     attendees: List[EventAttendeeResponse] = []
     created_at: datetime
     updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
+        populate_by_name = True  # Allow both alias and original name
 
 
 class RSVPRequest(BaseModel):
