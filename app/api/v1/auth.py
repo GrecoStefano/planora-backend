@@ -8,6 +8,7 @@ from app.core.security import verify_password, get_password_hash, create_access_
 from app.core.config import settings
 from app.core.dependencies import get_current_active_user
 from app.models.user import User
+from app.models.calendar import Calendar, CalendarScope, CalendarSource
 from app.schemas.user import UserCreate, UserResponse, Token
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -40,6 +41,20 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
     db.add(new_user)
     await db.commit()
     await db.refresh(new_user)
+    
+    # Create default local calendar for the user
+    default_calendar = Calendar(
+        owner_id=new_user.id,
+        name="Calendario Locale",
+        scope=CalendarScope.PERSONAL,
+        source=CalendarSource.LOCAL,
+        color="#3788d8",
+        description="Calendario locale per salvare eventi direttamente sul database",
+        is_visible=True,
+        acl={"users": [new_user.id], "permissions": {"read": True, "write": True}},
+    )
+    db.add(default_calendar)
+    await db.commit()
     
     return new_user
 

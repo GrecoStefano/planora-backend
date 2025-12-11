@@ -5,7 +5,7 @@ from sqlalchemy import select
 from app.core.database import get_db
 from app.core.dependencies import get_current_active_user
 from app.models.user import User
-from app.models.calendar import Calendar
+from app.models.calendar import Calendar, CalendarSource
 from app.schemas.calendar import (
     CalendarCreate,
     CalendarUpdate,
@@ -52,6 +52,7 @@ async def create_calendar(
         owner_id=current_user.id,
         name=calendar_data.name,
         scope=calendar_data.scope,
+        source=calendar_data.source if hasattr(calendar_data, 'source') else CalendarSource.LOCAL,
         color=calendar_data.color,
         description=calendar_data.description,
         is_visible=calendar_data.is_visible,

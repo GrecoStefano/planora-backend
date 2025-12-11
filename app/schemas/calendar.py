@@ -1,12 +1,13 @@
 from pydantic import BaseModel, Field, field_serializer
 from typing import Optional, List
 from datetime import datetime
-from app.models.calendar import CalendarScope, RSVPStatus, PrivacyLevel
+from app.models.calendar import CalendarScope, CalendarSource, RSVPStatus, PrivacyLevel
 
 
 class CalendarBase(BaseModel):
     name: str
     scope: CalendarScope
+    source: CalendarSource = CalendarSource.LOCAL
     color: str = "#3788d8"
     description: Optional[str] = None
     is_visible: bool = True
@@ -27,6 +28,7 @@ class CalendarUpdate(BaseModel):
 class CalendarResponse(CalendarBase):
     id: int
     owner_id: int
+    source: CalendarSource
     acl: dict
     created_at: datetime
     updated_at: Optional[datetime] = None

@@ -26,6 +26,13 @@ class PrivacyLevel(str, enum.Enum):
     CONFIDENTIAL = "confidential"
 
 
+class CalendarSource(str, enum.Enum):
+    LOCAL = "local"
+    MICROSOFT365 = "microsoft365"
+    GOOGLE = "google"
+    EXTERNAL = "external"
+
+
 class Calendar(Base):
     __tablename__ = "calendars"
 
@@ -33,6 +40,7 @@ class Calendar(Base):
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     name = Column(String, nullable=False)
     scope = Column(Enum(CalendarScope), default=CalendarScope.PERSONAL, nullable=False)
+    source = Column(Enum(CalendarSource), default=CalendarSource.LOCAL, nullable=False)
     color = Column(String, default="#3788d8", nullable=False)
     description = Column(Text, nullable=True)
     acl = Column(JSON, default=dict, nullable=False)  # Access Control List
